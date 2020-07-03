@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src='./js/tinymce/tinymce.min.js'></script>
+    <script>
+        tinymce.init({
+            selector: '#mytextarea',
+            language_url : './js/tinymce/langs/zh_CN.js',
+            language:'zh_CN',//注意大小写
+            // plugins : 'advlist autolink link image lists preview code', //字符串方式
+            plugins : [ 'advlist','autolink','link', 'image', 'lists', 'preview', 'code', 'bdmap', 'axupimgs', "media", 'fullscreen', 'table '], //字符串方式
+            toolbar: 'undo redo | styleselect | fontsizeselect | preview | link | image | axupimgs | media | code | table  | bdmap| newdocument | fullscreen | bold | italic | underline | strikethrough | alignleft | aligncenter | alignright | alignjustify   | bullist | numlist | outdent | indent | blockquote | removeformat | subscript | superscript ',
+            advlist_number_styles:"default,lower-alpha,lower-greek,lower-roman,upper-alpha,upper-roman",
+            file_picker_types: 'media, file',
+            width: 1350,
+            height: 600,
+            advlist_bullet_styles: 'square',
+            // advlist_number_styles: 'lower-alpha,lower-roman,upper-alpha,upper-roman',
+            bdmap_width:560,
+            bdmap_height:330,
+            images_upload_url: 'http://127.0.0.1:5000/uploadimage/',
+            // images_upload_base_path: '/demo',
+            // media_live_embeds: 'true',
+            images_upload_handler: function (blobInfo, succFun, failFun) {
+                var xhr, formData;
+                var file = blobInfo.blob();//转化为易于理解的file对象
+                // console.log(file)
+                xhr = new XMLHttpRequest();
+                xhr.withCredentials = false;
+                xhr.open('POST', 'http://127.0.0.1:5000/uploadimage/');
+                // xhr.open('GET', 'http://127.0.0.1:5000/upload/');
+                xhr.onload = function() {
+                    var json;
+                    if (xhr.status != 200) {
+                        failFun('HTTP Error: ' + xhr.status);
+                        return;
+                    }
+                    json = JSON.parse(xhr.responseText);
+                    if (!json || typeof json.location != 'string') {
+                        failFun('Invalid JSON: ' + xhr.responseText);
+                        return;
+                    }
+                    succFun(json.location);
+                };
+                formData = new FormData();
+                formData.append('file', file, file.name );//此处与源文档不一样
+                xhr.send(formData);
+            },
+            file_picker_callback: function(callback, value, meta) {
+                //当点击meidia图标上传时,判断meta.filetype == 'media'有必要，因为file_picker_callback是media(媒体)、image(图片)、file(文件)的共同入口
+                if (meta.filetype == 'media'){
+                    //文件分类
+                    var filetype=' .mp3, .mp4';
+                    //后端接收上传文件的地址
+                    var upurl='http://127.0.0.1:5000/uploadfile/';
+
+                    //模拟出一个input用于添加本地文件
+                    var input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', filetype);
+                    input.click();
+                    input.onchange = function() {
+                        var file = this.files[0];
+
+                        var xhr, formData;
+                        // console.log(file.name);
+                        xhr = new XMLHttpRequest();
+                        xhr.withCredentials = false;
+                        xhr.open('POST', upurl);
+                        xhr.onload = function() {
+                            var json;
+                            if (xhr.status != 200) {
+                                failure('HTTP Error: ' + xhr.status);
+                                return;
+                            }
+                            json = JSON.parse(xhr.responseText);
+                            if (!json || typeof json.location != 'string') {
+                                failure('Invalid JSON: ' + xhr.responseText);
+                                return;
+                            }
+                            callback(json.location);
+                        };
+                        formData = new FormData();
+                        formData.append('file', file, file.name );
+                        xhr.send(formData);
+                    }
+                }
+                else if (meta.filetype == 'file'){
+                    //文件分类
+                    var filetype='.pdf, .txt, .zip, .tar.gz, .tar, .gz , .rar, .7z, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .mp3, .mp4';
+                    //后端接收上传文件的地址
+                    var upurl='http://127.0.0.1:5000/uploadfile/';
+
+                    //模拟出一个input用于添加本地文件
+                    var input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', filetype);
+                    input.click();
+                    input.onchange = function() {
+                        var file = this.files[0];
+
+                        var xhr, formData;
+                        // console.log(file.name);
+                        xhr = new XMLHttpRequest();
+                        xhr.withCredentials = false;
+                        xhr.open('POST', upurl);
+                        xhr.onload = function() {
+                            var json;
+                            if (xhr.status != 200) {
+                                failure('HTTP Error: ' + xhr.status);
+                                return;
+                            }
+                            json = JSON.parse(xhr.responseText);
+                            if (!json || typeof json.location != 'string') {
+                                failure('Invalid JSON: ' + xhr.responseText);
+                                return;
+                            }
+                            callback(json.location);
+                        };
+                        formData = new FormData();
+                        formData.append('file', file, file.name );
+                        xhr.send(formData);
+                }
+
+
+
+                // --
+            }
+            },
+
+
+        });
+
+    </script>
+</head>
+
+<body>
+
+<form method="post">
+    <textarea id="mytextarea">Hello, World!</textarea>
+</form>
+</body>
+</html>
