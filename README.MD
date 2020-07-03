@@ -1,6 +1,6 @@
 # Python Tornado + Tinymce 富文本编辑器
 
-![image](https://github.com/renfanzi/python_tornado_tinymce/blob/master/tinymce.png)
+![image](./tinymce.png)
 
 ## 1. 目的
 
